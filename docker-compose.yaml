@@ -1,0 +1,53 @@
+services:
+  app:
+    build: ./app
+    container_name: miniblog-app
+    depends_on:
+      - db
+    ports:
+      - "8000:80"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      RUN_MIGRATIONS: "false"
+      RUN_SEEDERS: "false"
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - miniblog-net
+
+  db:
+    image: mysql:8.4
+    container_name: miniblog-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - miniblog-net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: miniblog-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: ${DB_HOST}
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:80"
+    networks:
+      - miniblog-net
+
+networks:
+  miniblog-net:
+
+volumes:
+  db_data:
